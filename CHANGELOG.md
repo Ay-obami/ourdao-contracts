@@ -12,6 +12,7 @@ All notable changes to `ourdao-contracts` are documented here. The format follow
 - Documented and regression-tested that voting weight is independent of a member's contribution (#509).
 - Locked treasury proposal documents after the first vote so governance evidence cannot be swapped mid-vote (#514).
 - Added a worked example and regression tests explaining how partial repayment, overdue repayment fees, and default contribution slashing interact (#515).
+- CI now enforces append-only, unique error-code discriminants and requires comments for intentional numeric gaps (#528).
 - Explicitly enforce and document that pausers cannot unpause (`admin::unpause` requires admin authorization and rejects non-admin pausers with `Error::NotAdmin`), separating emergency halt and resume privileges (#319).
 - `loan_req`, `loan_appr`, `loan_rpy` and `interest` events now carry the loan's `asset` as a trailing field (#343). Existing positional fields are unchanged, so indexers that read by position keep working; `interest` is only emitted for base-token repayments.
 - `exit_dao` / `calculate_exit_share` are now O(1): a maintained `ActiveContributions` total replaces the per-member scan (#353).
