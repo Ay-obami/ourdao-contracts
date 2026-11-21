@@ -204,6 +204,16 @@ delegation, while contribution controls economic exit share and loan eligibility
 **Tested:** ✅ `loans::heavily_slashed_member_keeps_full_base_voting_weight`
 (`contracts/dao/src/tests/loans.rs`)
 
+### G6 — Proposal evidence is immutable once voting has begun
+**Statement:** Loan documents may only change during the loan editing phase.
+Treasury proposals have no explicit editing phase, so their attached document
+may change only while `votes_cast == 0`. After the first treasury vote, the
+document hash is locked. This prevents voters from approving one document and
+having the proposer silently replace it with another.
+
+**Tested:** ✅ `docs::attach_document_treasury_proposal_proposer_and_non_proposer`
+(`contracts/dao/src/tests/docs.rs`)
+
 ---
 
 ---
