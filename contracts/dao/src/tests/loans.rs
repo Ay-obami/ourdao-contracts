@@ -8,6 +8,7 @@ use super::common::*;
 use crate::admin::TIMELOCK_DURATION;
 use crate::storage::ProposalKind;
 use crate::types::{LoanStatus, ProposalPhase, ProposalStatus, ProposalVote};
+use crate::util::BASE_VOTE_WEIGHT;
 use crate::Error;
 
 #[test]
@@ -1564,4 +1565,27 @@ fn repay_loan_in_asset_wrong_asset_moves_no_tokens() {
     assert_eq!(s.token.balance(&borrower), borrower_base_before);
     assert_eq!(s.token.balance(&s.client.address), dao_base_before);
     assert_eq!(s.client.get_loan(&pid).unwrap().amount_repaid, 0);
+}
+
+// Issue #509: voting power is deliberately independent of economic contribution.
+#[test]
+fn heavily_slashed_member_keeps_full_base_voting_weight() {
+    let s = setup(3);
+    let borrower = s.members.get(0).unwrap();
+    let voter = s.members.get(1).unwrap();
+
+    s.env.as_contract(&s.client.address, || {
+        let mut member = crate::storage::get_member(&s.env, &voter).unwrap();
+        member.contribution = 1;
+        crate::storage::set_member(&s.env, &member);
+    });
+    assert_eq!(s.client.get_member(&voter).unwrap().contribution, 1);
+    assert_eq!(s.client.get_voting_weight(&voter), BASE_VOTE_WEIGHT);
+
+    let pid = s.client.request_loan(&borrower, &500, &None);
+    advance(&s.env, EDITING + 1);
+    s.client.vote_on_loan_proposal(&voter, &pid, &true);
+
+    let proposal = s.client.get_loan_proposal(&pid).unwrap();
+    assert_eq!(proposal.for_votes, BASE_VOTE_WEIGHT);
 }
